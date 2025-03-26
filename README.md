@@ -12,7 +12,7 @@ For example, if the 1st hole is a par 4 hole, it can be entered as 1 P4 or 1P4.
 Shot information lines must include an abbreviation for the club used, shot feel, and shot result, and can optionally include additional information such as distance, penalty, or concede.
 
 The structure is approximately as follows:
-Club Feel Result \[Distance\] \[Penalty or Concede\]
+Club Feel Result \[Landing Spot\] \[Distance\] \[Penalty or Concede\]
 
 Club abbreviations are as follows:
 
@@ -37,6 +37,7 @@ Club abbreviations are as follows:
  * P : Putter
 
 Shot feel and shot result are divided into A, B, C grades, with A representing the best result.
+Landing Spot would be B which means it landed on bunker.
 Distance is recorded in meters, and concede is marked as OK.
 Penalty information includes general penalty and out of bounds, marked as H and OB respectively.
 Here are three examples:
