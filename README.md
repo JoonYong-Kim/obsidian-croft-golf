@@ -1,9 +1,27 @@
 # Croft Golf Obsidian Plugin
 
-This project aims to collect and manage data about golf as a hobby activity.
-During a round, shot information is recorded in a notebook, and after the round, the information is entered and processed.
+This project is an Obsidian plugin designed to help golfers efficiently record and manage their round data.  
+It allows users to systematically log each hole and shot information in a structured and intuitive manner.
 
-## Data Rule
+## 🚀 Key Features
+- **Golf Round Logging**: Easily input and manage shot details within Obsidian notes.
+- **Structured Data Format**: A simple and intuitive text-based recording system.
+- **Future Expandability**: Planned enhancements for statistics, performance tracking, and analytics.
+
+## 📥 Installation
+
+1. Clone this repository.
+   ```sh
+   git clone https://github.com/JoonYong-Kim/obsidian-croft-golf.git
+   ```
+2. Move the files to the Obsidian plugin directory (`.obsidian/plugins/`) and enable the plugin.
+3. Compile it.
+   ```sh
+   npm install
+   npm run dev
+   ```
+
+## 📝 Data Writing Rule
 
 Each line is managed as either hole information or shot information.
 Hole information lines represent hole numbers from 1 to 18, with a maximum of 36 holes possible.
@@ -40,20 +58,26 @@ Shot feel and shot result are divided into A, B, C grades, with A representing t
 Landing Spot would be B which means it landed on bunker.
 Distance is recorded in meters, and concede is marked as OK.
 Penalty information includes general penalty and out of bounds, marked as H and OB respectively.
-Here are three examples:
 
-If you swung a driver with an intermediate shot feel and a poor shot result, record it as:
+### 🎯 Example Input
+```
+1P4
+D B C
+I5 A C 150 H
+P C A 10 OK
+```
+#### 📌 Data Format Explanation
+- `1P4` → **Hole 1, Par 4**
+- `D B C` → **Driver shot, B-grade feel, C-grade result**
+- `I5 A C 150 H` → **Iron 5, A-grade feel, C-grade result, 150 meters, Hazard**
+- `P C A 10 OK` → **Putter, C-grade feel, A-grade result, 10 meters, Conceded**
 
-`D B C`
+## 🛠️ Development & Future Enhancements
+- [ ] **Improved User Interface**: A more intuitive UI for inputting and reviewing shot data.
+- [ ] **Statistics Features**: Analyze success rates and distances per hole/club.
+- [ ] **Automated Insights**: Provide strategic recommendations based on playstyle.
 
-If you swung a 5-iron for 150 meters with a good shot feel, but the shot result was poor and you received a 1-stroke penalty for a water hazard, record it as:
-
-`I5 A C 150 H`
-
-If you putted 10 meters with a putter, with a poor shot feel but a good result that received a concede, record it as:
-
-`P C A 10 OK`
-
-
-
+## 🤝 Contributing
+If you'd like to contribute, feel free to submit feedback via [Issues](https://github.com/JoonYong-Kim/obsidian-croft-golf/issues).  
+Pull requests are also welcome! 🙌
 
