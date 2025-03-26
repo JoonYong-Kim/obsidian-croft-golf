@@ -1,0 +1,55 @@
+/* styles.css */
+
+.score-sum-result {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: var(--background-secondary);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.score-sum-value {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--text-accent);
+  margin-left: 10px;
+}
+
+.score-sum-list {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: var(--background-secondary);
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.numbers-list {
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.number-item {
+  display: inline-block;
+  color: var(--text-normal);
+}
+
+.score-sum-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.score-sum-buttons button {
+  margin: 0 5px;
+  padding: 8px 16px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.score-sum-buttons button:hover {
+  background-color: var(--interactive-accent-hover);
+}
