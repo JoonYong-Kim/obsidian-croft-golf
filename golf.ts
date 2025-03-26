@@ -27,6 +27,8 @@ class Shot {
   quality: string;
   penalty: number;
   ok: boolean;
+  bunker: boolean;
+  pos: string;
 
   constructor(line: string) {
     let tmp:string[] = line.split(" ");
@@ -42,19 +44,39 @@ class Shot {
     this.penalty = 0;
     this.dist = 0;
 
-    if (tmp.length > 3) {
-      if (isNaN(Number(tmp[3]))) {
-        this._setPnO(tmp[3]);
+    if (!(tmp[2] === "C" && tmp[3] === "B")) {
+      if (tmp[2] === "C")
+        tmp.splice(3, 0, "R");
+      else
+        tmp.splice(3, 0, "F");
+      this.bunker = false;
+    } else {
+      this.bunker = true;
+    }
+
+    this.pos = tmp[3];
+
+    if (tmp.length > 4) {
+      if (isNaN(Number(tmp[4]))) {
+        this._setPnO(tmp[4]);
 
       } else {
-        this.dist = Number(tmp[3]);
-        if (tmp.length == 5) {
-          this._setPnO(tmp[4]);
+        this.dist = Number(tmp[4]);
+        if (tmp.length == 6) {
+          this._setPnO(tmp[5]);
         }
       }
     } else {
       this.dist = club[1];
     }
+  }
+
+  resetPos(pos: string) {
+    this.pos = pos;
+  }
+
+  getPos() {
+    return this.pos;
   }
 
   _setPnO (term: string) {
@@ -154,6 +176,10 @@ class Hole {
     return JSON.stringify(obj);
   }
 
+  getPar() {
+    return this.par;
+  }
+
   isGIR() {
     if (this.par - 2 >= this.score - this.putt) 
       return true;
@@ -169,7 +195,7 @@ class Hole {
   }
 
   getHoleName():string {
-    return this.index + "P" + this.par;
+    return this.index + " P" + this.par;
   }
 
   getScore():number {
@@ -192,14 +218,14 @@ class Hole {
     this.shots.push(shot);
   }
 
-  calculate() {
+  update() {
     this.score = 0;
     this.putt = 0;
     this.penalty = 0;
 
     for (let i = 0; i < this.shots.length; i++) {
-      this.score = this.score + 1 + this.shots[i].getPenalty();
-      this.penalty = this.penalty + this.shots[i].getPenalty();
+      this.score += 1 + this.shots[i].getPenalty();
+      this.penalty += this.shots[i].getPenalty();
 
       if (this.shots[i].isPutt())
         this.putt ++;
@@ -207,6 +233,10 @@ class Hole {
       if (this.shots[i].isOK()) {
         this.putt ++;
         this.score ++;
+      }
+
+      if (i != 0) {
+        this.shots[i].resetPos(this.shots[i-1].getPos());
       }
     }
 
@@ -223,14 +253,15 @@ class Round {
     let hole = null;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i] && lines[i].trim()) {   // empty line skip
-        if (this._isHoleLine(lines[i])) {
+        let tline = lines[i].toUpperCase();
+        if (this._isHoleLine(tline)) {
           if (hole != null) {
-            this.score = this.score + hole.calculate();
+            hole.update();
             this.holes.push(hole);
           }
-          hole = new Hole(lines[i]);
-        } else if (this._isShotLine(lines[i])) {
-          let shot = new Shot(lines[i]);
+          hole = new Hole(tline);
+        } else if (this._isShotLine(tline)) {
+          let shot = new Shot(tline);
           if (hole != null)
             hole.addShot(shot);
         } else {
@@ -240,9 +271,10 @@ class Round {
     }
 
     if (hole != null) {
-      this.score = this.score + hole.calculate();
+      hole.update();
       this.holes.push(hole);
     }
+    this.score = this.holes.reduce((sum, hole) => sum + hole.getScore(), 0);
   }
 
   /**
@@ -303,7 +335,7 @@ class Round {
 
     // 클럽 코드가 유효한지 확인
     if (!validClubCodes.includes(clubCode)) {
-      // 숫자로 시작하는 클럽 코드 추가 검증 (예: W3, W5)
+      // 숫자로 시작하는 클럽 코드 추가 검증 (예: W48, W52)
       const numberClubRegex = /^W?\d+$/;
       if (!numberClubRegex.test(clubCode)) return false;
     }
@@ -321,11 +353,13 @@ class Round {
       const part = parts[i];
 
       // 거리 검증 (숫자인지)
-      if (!isNaN(Number(part))) continue;
+      if (!isNaN(Number(part))) 
+        continue;
 
       // 페널티/컨시드 검증
-      const validExtras = ['H', 'OB', 'OK'];
-      if (!validExtras.includes(part)) return false;
+      const validExtras = ['B', 'H', 'OB', 'OK'];
+      if (!validExtras.includes(part)) 
+        return false;
     }
 
     return true;
@@ -370,23 +404,22 @@ class Round {
     return [A, B, C];
   }
 
-  compareQnR() {
-    let A = 0, B = 0, C = 0;
+  getExpected() {
+    let A = 0, C = 0, par = 0;
 
     for (let i = 0; i < this.holes.length; i++) {
+      par += this.holes[i].getPar();
       let shots = this.holes[i].getShots();
       for (let j = 0; j < shots.length; j++) {
         let feel = shots[j].getQuality();
         if (feel === "A")
           A++;
-        else if (feel === "B")
-          B++;
-        else
+        else if (feel === "C")
           C++;
       }
     }
 
-    return this.getScore() - (72 - A + C);
+    return par - A + C + this.getTotalPenalty();
   }
 
   getAveragePutt() {
@@ -404,6 +437,10 @@ class Round {
       (this.holes.filter(hole => hole.isGIR()).length / this.getNumberofHoles()) * 100,
       (this.holes.filter(hole => hole.isGIR1()).length / this.getNumberofHoles()) * 100
     ];
+  }
+
+  getTotalPenalty() {
+    return this.holes.reduce((sum, hole) => sum + hole.getPenalty(), 0);
   }
 }
 
