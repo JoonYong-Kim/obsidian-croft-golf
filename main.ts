@@ -51,14 +51,18 @@ export default class CroftGolfPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-  _appendScoreTable(table: string[], hole: Hole) {
-    table[0] = table[0] + " " + hole.getHoleName() + " |";
+  _appendScoreTable(table: string[], name: string, data: number[]) {
+    table[0] = table[0] + " " + name + " |";
     table[1] = table[1] + "-----|";
-    table[2] = table[2] + " " + hole.getScore() + " |";
-    table[3] = table[3] + " " + hole.getPutt() + " |";
-    table[4] = table[4] + " " + hole.getPenalty() + " |";
-    let gir = hole.isGIR() ? "O" : hole.isGIR1() ? "1" : "X";
-    table[5] = table[5] + " " + gir + " |";
+    table[2] = table[2] + " " + data[0] + " |";
+    table[3] = table[3] + " " + data[1] + " |";
+    table[4] = table[4] + " " + data[2] + " |";
+    if (name === "Total") {
+      table[5] = table[5] + " " + data[3] + " |";
+    } else {
+      let gir = (data[3] == 1) ? "O" : ((data[3] == 2) ? "1" : "X");
+      table[5] = table[5] + " " + gir + " |";
+    }
     return table;
   }
 
@@ -74,18 +78,27 @@ export default class CroftGolfPlugin extends Plugin {
     let template = ['| Hole |', '|-----|', '| Score |', '| Putt |', '| Penalty |', '| GIR |'];
     let table: string = "";
     let tmp: string[] = [];
+    let td: number[] = [0, 0, 0, 0];
+    let hd: number[] = [0, 0, 0, 0];
 
     for (let i = 0; i < round.getNumberofHoles(); i++) {
+
       if (i % 9 == 0) {
         if (tmp.length > 0) {
+          this._appendScoreTable (tmp, "Total", td);
           table = table + "\n" + this._makeScoreTable(tmp);
         }
         tmp = [...template];
+        td = [0, 0, 0, 0];
       }
-      this._appendScoreTable (tmp, round.getHole(i+1));
+      const hole = round.getHole(i+1);
+      hd = [hole.getScore(), hole.getPutt(), hole.getPenalty(), hole.isGIR() ? 1 : (hole.isGIR1() ? 2 : 0)]
+      this._appendScoreTable (tmp, hole.getHoleName(), hd);
+      td = [td[0] + hd[0], td[1] + hd[1], td[2] + hd[2], (hd[3] == 1) ? td[3] + 1 : td[3]]
     }
 
     if (tmp.length > 0) {
+      this._appendScoreTable (tmp, "Total", td);
       table = table + "\n" + this._makeScoreTable(tmp);
     }
     return table;
@@ -127,7 +140,8 @@ export default class CroftGolfPlugin extends Plugin {
             + "Total Score : " + round.getScore() + "\n" 
             + "Average Putt : " + round.getAveragePutt() + "\n" 
             + "GIR Rate : " + round.getGIRRate() + "\n" 
-            + "Result & Quality : " + round.compareQnR() + "\n" 
+            + "Total Penalty : " + round.getTotalPenalty() + "\n" 
+            + "Expected : " + round.getExpected () + "\n" 
             + this.getScoreTable(round) + "\n" 
             + this.getFeelChart(round) + "\n");
     }
